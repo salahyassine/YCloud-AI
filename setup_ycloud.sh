@@ -71,7 +71,7 @@ def ask(prompt:str, user_role:str, license_key:str):
 EOF
 
 # 7️⃣ إنشاء ZIP النهائي
-zip -r $ZIP_NAME ./*
+7z -r $ZIP_NAME ./*
 
 # 8️⃣ رفع المشروع إلى GitHub
 git init
