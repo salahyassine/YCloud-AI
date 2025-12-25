@@ -1,7 +1,7 @@
 @echo off
 SETLOCAL
 
-REM --- Vérifie si 7-Zip est installé ---
+REM --- Détecter 7-Zip ---
 WHERE 7z >nul 2>nul
 IF ERRORLEVEL 1 (
     echo 7-Zip non trouve, telechargement et installation...
@@ -19,29 +19,15 @@ IF ERRORLEVEL 1 (
 REM --- Aller dans le dossier du projet ---
 cd /d "%~dp0"
 
-REM --- Authentification GitHub CLI si nécessaire ---
+REM --- Auth GitHub CLI (ignore si déjà connecté) ---
 gh auth status >nul 2>nul
 IF ERRORLEVEL 1 (
     echo Authentification GitHub necessaire. Suivez les instructions.
     gh auth login
 )
 
-REM --- Pull pour eviter le push rejeté ---
-git pull --rebase origin main
+REM --- Pull pour eviter push rejeté (ignore erreurs) ---
+git pull --rebase origin main || echo Warning: git pull a echoue mais on continue
 
-REM --- Lancer le setup ---
-bash setup_ycloud.sh
-
-REM --- Créer le zip avec 7-Zip ---
-7z a YCloud_AI_Global.zip orchestrator deploy_global_ai.sh
-
-REM --- Ajouter, commit et push ---
-git add .
-git commit -m "Auto commit from run_ycloud script" 2>nul
-git push origin main
-
-echo.
-echo === SCRIPT TERMINE ===
-echo Appuyez sur ENTER pour fermer...
-pause >nul
-ENDLOCAL
+REM --- Lancer le setup (ignore erreurs) ---
+bash setup_ycloud_
