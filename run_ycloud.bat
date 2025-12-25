@@ -1,33 +1,34 @@
 @echo off
 SETLOCAL
 
-REM --- Détecter 7-Zip ---
-WHERE 7z >nul 2>nul
-IF ERRORLEVEL 1 (
-    echo 7-Zip non trouve, telechargement et installation...
-    powershell -Command "Invoke-WebRequest -Uri 'https://www.7-zip.org/a/7z2301-x64.exe' -OutFile '%TEMP%\7z2301-x64.exe'"
-    start /wait "" "%TEMP%\7z2301-x64.exe" /S
-)
-
-REM --- Ajouter 7-Zip au PATH si absent ---
-SET "SEVENZIP_PATH=C:\Program Files\7-Zip"
-echo %PATH% | findstr /I /C:"%SEVENZIP_PATH%" >nul
-IF ERRORLEVEL 1 (
-    setx PATH "%PATH%;%SEVENZIP_PATH%"
-)
-
-REM --- Aller dans le dossier du projet ---
+REM --- Aller dans le dossier du batch ---
 cd /d "%~dp0"
 
-REM --- Auth GitHub CLI (ignore si déjà connecté) ---
-gh auth status >nul 2>nul
-IF ERRORLEVEL 1 (
-    echo Authentification GitHub necessaire. Suivez les instructions.
-    gh auth login
+REM --- Vérifier si setup_ycloud.sh existe ---
+IF NOT EXIST "setup_ycloud.sh" (
+    echo ERREUR: setup_ycloud.sh non trouve!
+    pause
+    exit /b
 )
 
-REM --- Pull pour eviter push rejeté (ignore erreurs) ---
+REM --- Pull pour eviter push rejeté ---
+git add .
+git commit -m "Auto commit avant pull" 2>nul
 git pull --rebase origin main || echo Warning: git pull a echoue mais on continue
 
-REM --- Lancer le setup (ignore erreurs) ---
-bash setup_ycloud_
+REM --- Lancer le setup ---
+bash "setup_ycloud.sh" || echo Warning: setup_ycloud.sh a echoue mais on continue
+
+REM --- Créer le zip avec 7-Zip ---
+"C:\Program Files\7-Zip\7z.exe" a YCloud_AI_Global.zip orchestrator deploy_global_ai.sh || echo Warning: zip a echoue mais on continue
+
+REM --- Push vers GitHub ---
+git add .
+git commit -m "Auto commit from batch" 2>nul
+git push origin main || echo Warning: git push a echoue mais on continue
+
+echo.
+echo === SCRIPT AUTO TERMINE ===
+echo Appuyez sur ENTER pour fermer...
+pause >nul
+ENDLOCAL
