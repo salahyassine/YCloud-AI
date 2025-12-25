@@ -86,3 +86,5 @@ gh release create v1.0 $ZIP_NAME -t "YCloud AI Global Release v1.0" -n "Release 
 
 echo "✅ انتهى كل شيء! رابط التحميل المباشر:"
 echo "https://github.com/$USERNAME/$REPO/releases/download/v1.0/$ZIP_NAME"
+echo "=== SCRIPT TERMINÉ ==="
+read -p "Appuyez sur ENTER pour fermer..."
